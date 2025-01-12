@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "build": "echo \"Building the project...\" && mkdir -p public && echo '<!DOCTYPE html><html><head><title>Landing Page - Video Hub</title></head><body><h1>Welcome to Video Hub<</h1></body></html>' > public/landing.html"
+    "build": "echo \"Building the project...\" && mkdir -p public && echo '<!DOCTYPE html><html><head><title>Landing Page - Video Hub</title></head><body><h1>Welcome to Video Hub<</h1></body></html>' > public/index.html"
   },
   "keywords": [],
   "author": "",
