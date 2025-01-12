@@ -4,45 +4,35 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  node_version: '16.x'  # Or any other version you prefer
-
 steps:
-# Step 1: Install Node.js (if UseNode@1 does not work)
-- script: |
-    curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+- task: UseNode@2
+  inputs:
+    versionSpec: '14.x'
   displayName: 'Install Node.js'
 
-# Step 2: Checkout the repository
-- checkout: self
-
-# Step 3: Install backend and frontend dependencies
 - script: |
-    echo Installing backend dependencies...
-    cd backend
     npm install
-
-    echo Installing frontend dependencies...
-    cd ../frontend
-    npm install
-  displayName: 'Install dependencies'
-
-# Step 4: Build frontend
-- script: |
-    cd frontend
     npm run build
-  displayName: 'Build frontend (Vue.js)'
+  displayName: 'Install dependencies and build'
 
-# Step 5: Run backend tests (optional)
-- script: |
-    cd backend
-    npm test
-  displayName: 'Run backend tests'
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+  displayName: 'Archive files'
 
-# Step 6: Publish artifacts
 - task: PublishBuildArtifacts@1
   inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: 'drop'
-    publishLocation: 'Container'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    ArtifactName: 'drop'
+  displayName: 'Publish build artifacts'
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: '<Your Azure Subscription>'
+    appName: '<Your App Service Name>'
+    package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+  displayName: 'Deploy to Azure Web App'
