@@ -1,0 +1,48 @@
+trigger:
+- main  # Trigger the pipeline on pushes to the main branch
+
+pool:
+  vmImage: 'ubuntu-latest'  # Use the latest Ubuntu image for Linux-based deployment
+
+variables:
+  node_version: '16.x'  # Specify the Node.js version you want to use
+
+steps:
+# Step 1: Install Node.js and dependencies
+- task: UseNode@2
+  inputs:
+    versionSpec: $(node_version)
+    addToPath: true
+
+# Step 2: Checkout the repository
+- checkout: self
+
+# Step 3: Install dependencies (both backend and frontend)
+- script: |
+    echo Installing backend dependencies...
+    cd backend  # Assuming backend is in a folder named "backend"
+    npm install
+
+    echo Installing frontend dependencies...
+    cd ../frontend  # Assuming frontend is in a folder named "frontend"
+    npm install
+  displayName: 'Install dependencies'
+
+# Step 4: Build the frontend (Vue.js)
+- script: |
+    cd frontend
+    npm run build
+  displayName: 'Build frontend (Vue.js)'
+
+# Step 5: Run tests (optional step, depends on your setup)
+- script: |
+    cd backend
+    npm test  # Assuming you have tests for the backend
+  displayName: 'Run backend tests'
+
+# Step 6: Archive the build artifacts (both backend and frontend)
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'  # Path to the build directory
+    artifactName: 'drop'
+    publishLocation: 'Container'
