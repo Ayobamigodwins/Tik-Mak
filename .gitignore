@@ -1,1 +1,12 @@
+# Ignore environment variable files
 .env
+
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/

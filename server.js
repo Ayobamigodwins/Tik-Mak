@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors'); // Added CORS for frontend-backend communication
 
 const app = express();
-const port = process.env.PORT || 5000; // Port from environment variables or default to 5000
+const port = 5000;
 
 // Middleware to parse JSON and form data
 app.use(express.json());
@@ -20,8 +20,9 @@ app.use(cors());
 // Serve static files (HTML, CSS, JS, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
 
-require('dotenv').config();  // Make sure to require dotenv
-const mongoURI = process.env.MONGO_URI;  // Use the URI from the .env file
+// Load Mongo URI from environment variables
+const mongoURI = process.env.MONGO_URI;
+console.log("Mongo URI: ", mongoURI); // Debugging line to ensure .env is loaded correctly
 
 if (!mongoURI) {
   console.error('Error: MongoDB URI is not set in .env file');
@@ -29,11 +30,10 @@ if (!mongoURI) {
 }
 
 // Connect to MongoDB
-mongoose
-  .connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+mongoose.connect(mongoURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
@@ -41,7 +41,7 @@ mongoose
 const videoSchema = new mongoose.Schema({
   filename: String,
   filepath: String,
-  user: String, // We'll store the user ID or token info here
+  user: String, // Store user ID or username
   likes: { type: Number, default: 0 }, // Like counter
   ratings: [Number], // Array to store individual ratings
   averageRating: { type: Number, default: 0 }, // Store average rating
@@ -74,9 +74,9 @@ app.post('/signup', (req, res) => {
 
 // Route to log in and issue a token
 app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  // You can add your login logic here (e.g., checking password, etc.)
-  const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1h' }); // Create JWT token
+  const { email, password } = req.body;
+  // Check if email and password match your DB (for simplicity, we skip this here)
+  const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' }); // Create JWT token
   res.json({ token });
 });
 
@@ -85,7 +85,7 @@ const authenticateToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.status(403).json({ message: 'Access denied' });
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(token, 'secretkey', (err, user) => {
     if (err) return res.status(403).json({ message: 'Invalid token' });
     req.user = user;
     next();
@@ -100,14 +100,15 @@ app.post('/upload', authenticateToken, upload.single('file'), async (req, res) =
 
   const video = new Video({
     filename: req.file.originalname,
-    filepath: `/uploads/${req.file.filename}`,
-    user: req.user.username,
+    filepath: `uploads/${req.file.filename}`,
+    user: req.user.email,
   });
 
   try {
     await video.save();
     res.json({ message: 'File uploaded successfully', video });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Failed to save video in database' });
   }
 });

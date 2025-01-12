@@ -7,7 +7,6 @@
 </head>
 <body>
   <h2>Welcome to the Dashboard</h2>
-
   <h3>Your Uploaded Videos</h3>
 
   <!-- Search Bar -->
@@ -19,18 +18,18 @@
     <!-- Video list will be displayed here -->
   </div>
 
-  <form id="uploadForm" aria-labelledby="uploadFormLabel">
-    <h4 id="uploadFormLabel">Upload a Video</h4>
+  <form id="uploadForm">
+    <h4>Upload a Video</h4>
     <label for="videoFile">Choose a video file to upload:</label>
-    <input type="file" id="videoFile" name="videoFile" accept="video/*" required title="Select a video file" aria-required="true" />
-    <button type="submit" title="Upload video">Upload Video</button>
+    <input type="file" id="videoFile" name="videoFile" accept="video/*" required />
+    <button type="submit">Upload Video</button>
   </form>
 
   <script>
     // Check if user is authenticated
     const token = localStorage.getItem('token');
     if (!token) {
-      window.location.href = 'login.html';  // Redirect to login if no token
+      window.location.href = 'login.html'; // Redirect to login if no token
     }
 
     // Fetch the user's uploaded videos
@@ -38,11 +37,8 @@
       try {
         const response = await fetch('http://localhost:5000/videos', {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}` // Send the token in the header
-          }
+          headers: { 'Authorization': `Bearer ${token}` } // Correct token usage
         });
-
         const data = await response.json();
         const videoGallery = document.getElementById('videoGallery');
         videoGallery.innerHTML = ''; // Clear previous video listings
@@ -50,7 +46,7 @@
         data.videos.forEach(video => {
           const videoElement = document.createElement('video');
           videoElement.controls = true;
-          videoElement.src = `http://localhost:5000${video.filepath}`; // Video file path
+          videoElement.src = `http://localhost:5000/${video.filepath}`; // Video file path
 
           const videoTitle = document.createElement('h4');
           videoTitle.textContent = video.filename;
@@ -72,6 +68,7 @@
           videoContainer.appendChild(likeButton);
           videoContainer.appendChild(rateButton);
           videoContainer.appendChild(averageRating);
+
           videoGallery.appendChild(videoContainer);
         });
       } catch (error) {
@@ -84,7 +81,6 @@
     // Search videos by filename
     async function searchVideos() {
       const query = document.getElementById('search').value;
-
       if (!query) {
         alert('Please enter a search term');
         return;
@@ -93,11 +89,8 @@
       try {
         const response = await fetch(`http://localhost:5000/search?query=${query}`, {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}` // Send the token in the header
-          }
+          headers: { 'Authorization': `Bearer ${token}` } // Correct token usage
         });
-
         const data = await response.json();
         const videoGallery = document.getElementById('videoGallery');
         videoGallery.innerHTML = ''; // Clear previous video listings
@@ -106,18 +99,18 @@
           data.videos.forEach(video => {
             const videoElement = document.createElement('video');
             videoElement.controls = true;
-            videoElement.src = `http://localhost:5000${video.filepath}`; // Video file path
+            videoElement.src = `http://localhost:5000/${video.filepath}`;
 
             const videoTitle = document.createElement('h4');
             videoTitle.textContent = video.filename;
 
             const likeButton = document.createElement('button');
             likeButton.textContent = `Like (${video.likes})`;
-            likeButton.onclick = () => likeVideo(video._id); // Like video functionality
+            likeButton.onclick = () => likeVideo(video._id);
 
             const rateButton = document.createElement('button');
             rateButton.textContent = 'Rate (1-5)';
-            rateButton.onclick = () => rateVideo(video._id); // Rate video functionality
+            rateButton.onclick = () => rateVideo(video._id);
 
             const averageRating = document.createElement('p');
             averageRating.textContent = `Average Rating: ${video.averageRating.toFixed(1)}`;
@@ -128,6 +121,7 @@
             videoContainer.appendChild(likeButton);
             videoContainer.appendChild(rateButton);
             videoContainer.appendChild(averageRating);
+
             videoGallery.appendChild(videoContainer);
           });
         } else {
@@ -138,10 +132,10 @@
       }
     }
 
+    // Upload Video
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const videoFile = document.getElementById('videoFile').files[0];
-
       if (!videoFile) {
         alert('Please select a video file to upload.');
         return;
@@ -153,9 +147,7 @@
       try {
         const response = await fetch('http://localhost:5000/upload', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}` // Send the token in the header
-          },
+          headers: { 'Authorization': `Bearer ${token}` }, // Correct token usage
           body: formData,
         });
 
@@ -164,8 +156,6 @@
         }
 
         const data = await response.json();
-        console.log(data); // Log the response for debugging
-
         if (data.message === 'File uploaded successfully') {
           alert('Video uploaded successfully');
           fetchUploadedVideos(); // Refresh the video list after upload
@@ -183,11 +173,8 @@
       try {
         const response = await fetch(`http://localhost:5000/like/${videoId}`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const data = await response.json();
         if (data.message === 'Video liked successfully') {
           alert('Video liked successfully');
@@ -202,7 +189,6 @@
     async function rateVideo(videoId) {
       const rating = prompt('Rate this video (1-5):');
       const ratingValue = parseInt(rating, 10);
-
       if (isNaN(ratingValue) || ratingValue < 1 || ratingValue > 5) {
         alert('Please enter a valid rating between 1 and 5.');
         return;
@@ -211,13 +197,9 @@
       try {
         const response = await fetch(`http://localhost:5000/rate/${videoId}`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ rating: ratingValue })
         });
-
         const data = await response.json();
         if (data.message === 'Video rated successfully') {
           alert('Video rated successfully');
