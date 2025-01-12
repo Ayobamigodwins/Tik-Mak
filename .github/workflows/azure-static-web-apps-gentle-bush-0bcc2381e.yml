@@ -38,7 +38,7 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_BUSH_0BCC2381E }}
           app_location: "/public"            # App source code path (relative to the repository root)
-          api_location: ""             # API source code path (if applicable, set relative path)
+          api_location: "/"             # API source code path (if applicable, set relative path)
           output_location: "" # Root directory
           action: "upload" # This specifies the deployment action
           app_build_command: "npm run build"
