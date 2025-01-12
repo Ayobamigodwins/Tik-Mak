@@ -40,6 +40,7 @@ jobs:
           app_location: "/"            # App source code path (relative to the repository root)
           api_location: ""             # API source code path (if applicable, set relative path)
           output_location: "" # Root directory
+          action: "upload" # This specifies the deployment action
           app_build_command: "npm run build"
 
   close_pull_request_job:
