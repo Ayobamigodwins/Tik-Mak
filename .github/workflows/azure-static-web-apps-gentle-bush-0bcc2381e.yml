@@ -36,7 +36,7 @@ jobs:
         id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_BUSH_0BCC2381E }}
+          azure_static_web_apps_api_token: ${{ 2e64a83e4f203e3a0d4d5d8435690adef7cf94b15b179ed86313624cdc75544a04-080ad891-1ba3-4657-bbf8-897b41aa85a601e19300bcc2381e }}
           app_location: ""            # App source code path (relative to the repository root)
           api_location: ""             # API source code path (if applicable, set relative path)
           output_location: "" # Root directory
